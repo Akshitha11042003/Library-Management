@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // SQLite is used here for self-contained, out-of-the-box operation in the Cloud Run sandbox.
+  // To switch to MySQL in production, change the provider to "mysql" and ensure your DATABASE_URL in .env matches:
+  // provider = "mysql"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  passwordHash String
+  name         String
+  role         String         @default("MEMBER") // Stored as a string to maintain compatibility across all engines, but logically bounded by Role enum values "MEMBER" | "LIBRARIAN"
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  borrows      BorrowRecord[]
+
+  @@map("users")
+}
+
+model Book {
+  id        String         @id @default(uuid())
+  isbn      String         @unique
+  title     String
+  author    String
+  category  String
+  quantity  Int            @default(1)
+  availableQuantity Int            @default(1)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  borrows   BorrowRecord[]
+
+  @@map("books")
+}
+
+model BorrowRecord {
+  id         String   @id @default(uuid())
+  memberId   String
+  bookId     String
+  borrowDate DateTime @default(now())
+  dueDate    DateTime
+  returnDate DateTime?
+  status     String   @default("BORROWED") // Logically "BORROWED" | "RETURNED" | "OVERDUE"
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relationships
+  member User @relation(fields: [memberId], references: [id], onDelete: Restrict)
+  book   Book @relation(fields: [bookId], references: [id], onDelete: Restrict)
+
+  @@index([memberId])
+  @@index([bookId])
+  @@map("borrow_records")
+}

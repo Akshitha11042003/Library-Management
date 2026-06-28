@@ -1,0 +1,6 @@
+{
+  "name": "Library Management System Architecture",
+  "description": "Production-grade backend software architecture and implementation blueprint for a secure, scalable Library Management System.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
